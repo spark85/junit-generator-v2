@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +44,7 @@ public class JUnitGeneratorUtil {
     public static final String PARAM_CLASS = "paramClass";
 
     public static final Pattern SOURCE_PATH_PATTERN = Pattern.compile("\\$\\{SOURCEPATH\\}");
+    public static final Pattern PROJECT_BASE_PATTERN = Pattern.compile("\\$\\{PROJECT_BASE\\}");
     public static final Pattern PACKAGE_PATTERN = Pattern.compile("\\$\\{PACKAGE\\}");
     public static final Pattern PACKAGE_NAME_PATTERN = Pattern.compile("\\.");
     public static final Pattern FILENAME_PATTERN = Pattern.compile("\\$\\{FILENAME\\}");
@@ -191,8 +191,9 @@ public class JUnitGeneratorUtil {
             throws IOException {
         String outputPattern = getInstance(genCtx.getProject()).getOutputFilePattern();
         String sourcePath = getSourcePath(genCtx.getPsiClass(), genCtx.getDataContext());
+        String projectBase = genCtx.getProject().getBaseDir().getPath();
 
-        if (sourcePath == null) {
+        if (sourcePath == null || projectBase == null) {
             throw new IllegalArgumentException(
                     String.format("File source path cannot be null to create unit test. Was '%s' in a source directory?",
                             genCtx.getPsiClass().getName()));
@@ -206,8 +207,14 @@ public class JUnitGeneratorUtil {
             sourcePath = sourcePath.substring(matcher.start());
         }
 
+        matcher = PROJECT_BASE_PATTERN.matcher(sourcePath);
+        if (matcher.find()) {
+            sourcePath = sourcePath.substring(matcher.start());
+        }
+
         //replace our tokens with regular expressions
         outputPattern = SOURCE_PATH_PATTERN.matcher(outputPattern).replaceAll(sourcePath);
+        outputPattern = PROJECT_BASE_PATTERN.matcher(outputPattern).replaceAll(projectBase);
         String packageToPath = PACKAGE_NAME_PATTERN.matcher(packageName).replaceAll(PATH_PATTERN);
         outputPattern = PACKAGE_PATTERN.matcher(outputPattern).replaceAll(packageToPath);
         outputPattern = FILENAME_PATTERN.matcher(outputPattern).replaceAll(testClassName);
@@ -263,7 +270,7 @@ public class JUnitGeneratorUtil {
     public static JUnitGeneratorSettings getInstance() {
         JUnitGeneratorSettings settings = ServiceManager.getService(JUnitGeneratorConfigurable.AppSettings.class).getState();
         //force the project settings flag to be false because this is the app settings
-        if ( settings != null ) {
+        if (settings != null) {
             settings.setUseProjectSettings(false);
         }
         return settings;
