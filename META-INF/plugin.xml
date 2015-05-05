@@ -8,7 +8,7 @@
     allows the user to selectively create the target file content.</p>
     <p>A future revision will allow the user to generate their own test case macros.</p>]]>
     </description>
-    <version>2.0.11</version>
+    <version>2.0.12</version>
     <vendor email="josborn@belltracy.com" url="http://www.belltracy.com" logo="/org/intellij/plugins/junitgen/logo.png">
         Bell Tracy, Ltd.
     </vendor>
@@ -59,6 +59,7 @@
 
     <change-notes><![CDATA[
             <p>This revision adds support for pattern ${PROJECT_BASE} when exporting unit tests.</p>
+            <p>Re-released with java 1.6 compatibility.</p>
             <p>Previous release notes:</p>
             <ul>
             <li><a href="https://code.google.com/p/junit-generator-v2/issues/detail?id=2">https://code.google.com/p/junit-generator-v2/issues/detail?id=2</a>
